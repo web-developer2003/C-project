@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Grading Calculator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            max-width: 600px;
+            width: 100%;
+            padding: 40px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 3px solid #667eea;
+        }
+
+        .header h1 {
+            color: #333;
+            font-size: 28px;
+            margin-bottom: 5px;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            color: #333;
+            font-weight: bold;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .radio-group {
+            display: flex;
+            gap: 20px;
+            margin-top: 10px;
+        }
+
+        .radio-group label {
+            display: flex;
+            align-items: center;
+            font-weight: normal;
+            cursor: pointer;
+        }
+
+        .radio-group input[type="radio"] {
+            width: auto;
+            margin-right: 8px;
+            cursor: pointer;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin-top: 10px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .results {
+            display: none;
+            margin-top: 30px;
+            padding: 25px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border-left: 5px solid #667eea;
+        }
+
+        .results.show {
+            display: block;
+        }
+
+        .results h2 {
+            color: #333;
+            margin-bottom: 20px;
+            text-align: center;
+            font-size: 24px;
+        }
+
+        .result-table {
+            width: 100%;
+            margin-bottom: 20px;
+        }
+
+        .result-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .result-row:last-child {
+            border-bottom: none;
+        }
+
+        .result-label {
+            font-weight: bold;
+            color: #555;
+        }
+
+        .result-value {
+            color: #333;
+        }
+
+        .total-section {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        .total-percentage {
+            font-size: 32px;
+            font-weight: bold;
+            color: #667eea;
+            margin: 10px 0;
+        }
+
+        .grade-badge {
+            display: inline-block;
+            padding: 10px 25px;
+            border-radius: 25px;
+            font-size: 24px;
+            font-weight: bold;
+            color: white;
+            margin: 10px 0;
+        }
+
+        .status {
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+            margin-top: 15px;
+        }
+
+        .status.pass {
+            background: #d4edda;
+            color: #155724;
+            border: 2px solid #c3e6cb;
+        }
+
+        .status.fail {
+            background: #f8d7da;
+            color: #721c24;
+            border: 2px solid #f5c6cb;
+        }
+
+        .error {
+            color: #dc3545;
+            font-size: 12px;
+            margin-top: 5px;
+            display: none;
+        }
+
+        .error.show {
+            display: block;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 25px;
+            }
+
+            .header h1 {
+                font-size: 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1>Student Grading Calculator System</h1>
+        <p>Enter your exam scores to calculate your final grade</p>
+    </div>
+
+    <form id="gradingForm">
+        <div class="form-group">
+            <label for="midterm">Mid-term Exam Points (out of 100):</label>
+            <input type="number" id="midterm" step="0.01" min="0" max="100" required>
+            <span class="error" id="midtermError">Points must be between 0 and 100</span>
+        </div>
+
+        <div class="form-group">
+            <label for="final">Final Exam Points (out of 50):</label>
+            <input type="number" id="final" step="0.01" min="0" max="50" required>
+            <span class="error" id="finalError">Points must be between 0 and 50</span>
+        </div>
+
+        <div class="form-group">
+            <label for="linux">Linux Exam Points (out of 100):</label>
+            <input type="number" id="linux" step="0.01" min="0" max="100" required>
+            <span class="error" id="linuxError">Points must be between 0 and 100</span>
+        </div>
+
+        <div class="form-group">
+            <label>Are you eligible for Cisco exam?</label>
+            <div class="radio-group">
+                <label>
+                    <input type="radio" name="eligible" value="yes" required> Yes
+                </label>
+                <label>
+                    <input type="radio" name="eligible" value="no"> No
+                </label>
+            </div>
+        </div>
+
+        <div class="form-group" id="cExamGroup">
+            <label for="cExam" id="cExamLabel">Cisco/C Lab Exam Points (out of 100):</label>
+            <input type="number" id="cExam" step="0.01" min="0" max="100" required>
+            <span class="error" id="cExamError">Points must be between 0 and 100</span>
+        </div>
+
+        <button type="submit" class="btn">Calculate Grade</button>
+    </form>
+
+    <div class="results" id="results">
+        <h2>GRADE SUMMARY</h2>
+
+        <div class="result-table">
+            <div class="result-row">
+                <span class="result-label">Mid-term:</span>
+                <span class="result-value" id="midtermResult">-</span>
+            </div>
+            <div class="result-row">
+                <span class="result-label">Final:</span>
+                <span class="result-value" id="finalResult">-</span>
+            </div>
+            <div class="result-row">
+                <span class="result-label">Linux:</span>
+                <span class="result-value" id="linuxResult">-</span>
+            </div>
+            <div class="result-row">
+                <span class="result-label" id="cExamType">C Lab:</span>
+                <span class="result-value" id="cExamResult">-</span>
+            </div>
+        </div>
+
+        <div class="total-section">
+            <div>TOTAL PERCENTAGE</div>
+            <div class="total-percentage" id="totalPercent">0%</div>
+            <div class="grade-badge" id="gradeBadge">-</div>
+        </div>
+
+        <div class="status" id="status">-</div>
+    </div>
+</div>
+
+<script>
+    const form = document.getElementById('gradingForm');
+    const results = document.getElementById('results');
+    const radioButtons = document.querySelectorAll('input[name="eligible"]');
+    const cExamLabel = document.getElementById('cExamLabel');
+
+    // Update label based on eligibility
+    radioButtons.forEach(radio => {
+        radio.addEventListener('change', function() {
+            if (this.value === 'yes') {
+                cExamLabel.textContent = 'Cisco Exam Points (out of 100):';
+            } else {
+                cExamLabel.textContent = 'C Lab Exam Points (out of 100):';
+            }
+        });
+    });
+
+    function getLetterGrade(percentage) {
+        if (percentage >= 95) return 'A+';
+        else if (percentage >= 90) return 'A';
+        else if (percentage >= 85) return 'B+';
+        else if (percentage >= 80) return 'B';
+        else if (percentage >= 75) return 'B-';
+        else if (percentage >= 70) return 'C+';
+        else if (percentage >= 65) return 'C';
+        else if (percentage >= 60) return 'C-';
+        else if (percentage >= 40) return 'D';
+        else return 'F';
+    }
+
+    function getGradeColor(grade) {
+        if (grade.startsWith('A')) return '#28a745';
+        else if (grade.startsWith('B')) return '#17a2b8';
+        else if (grade.startsWith('C')) return '#ffc107';
+        else if (grade === 'D') return '#fd7e14';
+        else return '#dc3545';
+    }
+
+    function validateInput(value, min, max, errorId) {
+        const errorEl = document.getElementById(errorId);
+        if (value < min || value > max) {
+            errorEl.classList.add('show');
+            return false;
+        }
+        errorEl.classList.remove('show');
+        return true;
+    }
+
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        const midterm = parseFloat(document.getElementById('midterm').value);
+        const final = parseFloat(document.getElementById('final').value);
+        const linux = parseFloat(document.getElementById('linux').value);
+        const cExam = parseFloat(document.getElementById('cExam').value);
+        const eligible = document.querySelector('input[name="eligible"]:checked').value;
+
+        // Validate all inputs
+        const validMidterm = validateInput(midterm, 0, 100, 'midtermError');
+        const validFinal = validateInput(final, 0, 50, 'finalError');
+        const validLinux = validateInput(linux, 0, 100, 'linuxError');
+        const validCExam = validateInput(cExam, 0, 100, 'cExamError');
+
+        if (!validMidterm || !validFinal || !validLinux || !validCExam) {
+            return;
+        }
+
+        // Calculate percentages
+        const midtermPercent = (midterm / 100) * 30;
+        const finalPercent = (final / 50) * 30;
+        const linuxPercent = (linux / 100) * 20;
+        const cPercent = (cExam / 100) * 20;
+        const totalPercent = midtermPercent + finalPercent + linuxPercent + cPercent;
+
+        // Display results
+        document.getElementById('midtermResult').textContent = `${midterm.toFixed(2)}/100 - ${midtermPercent.toFixed(2)}%`;
+        document.getElementById('finalResult').textContent = `${final.toFixed(2)}/50 - ${finalPercent.toFixed(2)}%`;
+        document.getElementById('linuxResult').textContent = `${linux.toFixed(2)}/100 - ${linuxPercent.toFixed(2)}%`;
+
+        const examType = eligible === 'yes' ? 'Cisco' : 'C Lab';
+        document.getElementById('cExamType').textContent = examType + ':';
+        document.getElementById('cExamResult').textContent = `${cExam.toFixed(2)}/100 - ${cPercent.toFixed(2)}%`;
+
+        document.getElementById('totalPercent').textContent = `${totalPercent.toFixed(2)}%`;
+
+        const grade = getLetterGrade(totalPercent);
+        const gradeBadge = document.getElementById('gradeBadge');
+        gradeBadge.textContent = grade;
+        gradeBadge.style.background = getGradeColor(grade);
+
+        const statusDiv = document.getElementById('status');
+        if (totalPercent >= 40) {
+            statusDiv.textContent = 'Congratulations you passed! ✓';
+            statusDiv.className = 'status pass';
+        } else {
+            statusDiv.textContent = 'Sorry, you have to pay 2.5mln sums ^_^';
+            statusDiv.className = 'status fail';
+        }
+
+        results.classList.add('show');
+        results.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    });
+</script>
+</body>
+</html>
